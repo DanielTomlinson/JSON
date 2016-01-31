@@ -56,14 +56,8 @@ public enum JSON {
     public static func from(values: [Any]) -> JSON {
         var jsonArray: [JSON] = []
         for value in values {
-            if let value = value as? Bool {
-                jsonArray.append(JSON.from(value))
-            }
-            if let value = value as? Double {
-                jsonArray.append(JSON.from(value))
-            }
-            if let value = value as? String {
-                jsonArray.append(JSON.from(value))
+            if let value = value as? JSONEncodeable {
+                jsonArray.append(value.JSONValue)
             }
             if let value = value as? [Any] {
                 jsonArray.append(JSON.from(value))
@@ -79,14 +73,8 @@ public enum JSON {
     public static func from(value: [String: Any]) -> JSON {
         var jsonDictionary: [String: JSON] = [:]
         for (key, value) in value {
-            if let value = value as? Bool {
-                jsonDictionary[key] = JSON.from(value)
-            }
-            if let value = value as? Double {
-                jsonDictionary[key] = JSON.from(value)
-            }
-            if let value = value as? String {
-                jsonDictionary[key] = JSON.from(value)
+            if let value = value as? JSONEncodeable {
+                jsonDictionary[key] = value.JSONValue
             }
             if let value = value as? [Any] {
                 jsonDictionary[key] = JSON.from(value)
