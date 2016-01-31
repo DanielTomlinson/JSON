@@ -24,6 +24,10 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
+public enum JSONErrors: ErrorType {
+	case UnsupportedValue
+}
+
 public enum JSON {
     case NullValue
     case BooleanValue(Bool)
@@ -32,59 +36,32 @@ public enum JSON {
     case ArrayValue([JSON])
     case ObjectValue([String: JSON])
 
-    public static func from(value: Bool) -> JSON {
-        return .BooleanValue(value)
-    }
-
-    public static func from(value: Double) -> JSON {
-        return .NumberValue(value)
-    }
-
-    public static func from(value: String) -> JSON {
-        return .StringValue(value)
-    }
-
-    public static func from(value: [JSON]) -> JSON {
-        return .ArrayValue(value)
-    }
-
-    public static func from(value: [String: JSON]) -> JSON {
-        return .ObjectValue(value)
-    }
-
-    // TODO: decide what to do if Any is not a JSON value
-    public static func from(values: [Any]) -> JSON {
+    public static func from(values: [Any]) throws -> JSON {
         var jsonArray: [JSON] = []
         for value in values {
             if let value = value as? JSONEncodeable {
                 jsonArray.append(value.JSONValue)
             }
-            if let value = value as? [Any] {
-                jsonArray.append(JSON.from(value))
-            }
-            if let value = value as? [String: Any] {
-                jsonArray.append(JSON.from(value))
-            }
+			else {
+				throw JSONErrors.UnsupportedValue
+			}
         }
-        return JSON.from(jsonArray)
+
+        return JSON.ArrayValue(jsonArray)
     }
 
-    // TODO: decide what to do if Any is not a JSON value
-    public static func from(value: [String: Any]) -> JSON {
+    public static func from(value: [String: Any]) throws -> JSON {
         var jsonDictionary: [String: JSON] = [:]
         for (key, value) in value {
             if let value = value as? JSONEncodeable {
                 jsonDictionary[key] = value.JSONValue
             }
-            if let value = value as? [Any] {
-                jsonDictionary[key] = JSON.from(value)
-            }
-            if let value = value as? [String: Any] {
-                jsonDictionary[key] = JSON.from(value)
-            }
+			else {
+				throw JSONErrors.UnsupportedValue
+			}
         }
 
-        return JSON.from(jsonDictionary)
+        return JSON.ObjectValue(jsonDictionary)
     }
 
     public var isBoolean: Bool {
